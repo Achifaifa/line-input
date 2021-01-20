@@ -46,14 +46,9 @@ function _init()
 
   --play intro bleep
   music(62)
-
-  --previous game init for testing
-  --state=2
-  --initgame()
   
 end
 
---initialize game state, should be called before every game
 function initgame()
 
   --create block area
@@ -302,7 +297,7 @@ function keypress_timing()
 end
 
 --rotates current piece
---0 ccw, 1 cw (to-do)
+--0 ccw, 1 cw
 function rotator(cw)
 
   --this fucking sucks. copy data to restore later if needed
@@ -348,6 +343,12 @@ function rotator(cw)
   --If there are pieces in the way, revert back
   if(collisionator()==-1)do
     currentpiece={coordbackup, piecebackup}
+  end
+
+  --If CW rotation is needed, repeat two more times
+  if(cw==1)do 
+    rotator()
+    rotator()
   end
 end
 
@@ -404,8 +405,12 @@ function notechecker()
 end
 
 --0 if everything is ok, 1 if the piece is on bottom or over something, -1 if game over
-function collisionator()
+--lat for lateral detection, -1 left, 1 right
+function collisionator(lat)
 
+  if(lat==nil)do lat=0 end --yikes
+
+  --default result
   res=0
 
   --detect surroundings
@@ -414,11 +419,19 @@ function collisionator()
   local yc=currentpiece[1][1]
   for i=1,#piece do
     for j=1,#piece[1] do 
-      if(piece[i][j]!=0 and yc+#piece<25)do 
+      if(piece[i][j]!=0 and yc+#piece<25 and xc>1 and xc<10)do 
         --check if it collides with background
         if (grid[yc+i][xc+j]!=0) then return -1 end 
         --check if there are things below
-        if (grid[yc+i+1][xc+j]!=0) do
+        if (grid[yc+i+1][xc+j]!=0 and lat==0) do
+          res=1 
+        end 
+        --right 
+        if (grid[yc+i][xc+j+1]!=0 and lat==1) do
+          res=1 
+        end 
+        --left
+        if (grid[yc+i][xc+j-1]!=0 and lat==-1) do
           res=1 
         end 
       end 
@@ -426,7 +439,7 @@ function collisionator()
   end
 
   --piece at bottom
-  if(currentpiece[1][1]+#currentpiece[2]>24) then return 1 end
+  if(currentpiece[1][1]+#currentpiece[2]>24 and lat==0) then return 1 end
 
   return res
 end
@@ -518,13 +531,13 @@ function _update()
     
     --controls (LRUD OX -> 0..6)
     if(btnp(0))do --left
-      if(currentpiece[1][2]-1>=0)do
+      if(currentpiece[1][2]-1>=0 and collisionator(-1)==0)do
         currentpiece[1][2]=currentpiece[1][2]-1
         comboer(1)
       end
     end
     if(btnp(1))do --right
-      if(currentpiece[1][2]+1+#currentpiece[2][1]<11)do
+      if(currentpiece[1][2]+1+#currentpiece[2][1]<11 and collisionator(1)==0)do
         currentpiece[1][2]=currentpiece[1][2]+1
         comboer(1)
       end
@@ -731,5 +744,5 @@ __music__
 01 7c7d7e7f
 02 7c7d7e7f
 00 3f424344
-00 3e424344
+04 3e424344
 
