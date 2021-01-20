@@ -90,14 +90,18 @@ end
 function draw_block_area()
 
   --area border
-  rect(36,18,78,121)--x+6 y+6
+  rect(36,18,77,119)--x+6 y+6
 
   --main grid
   for i=1,#grid do 
     for j=1,#grid[i] do
-      rectfill(33+(j*4),15+(i*4) ,37+(j*4),20+(i*4) ,grid[i][j])
+      rectfill(33+(j*4),15+(i*4) ,36+(j*4),18+(i*4) ,grid[i][j])
     end
   end 
+  color()
+end
+
+function draw_current_piece()
 
   --current piece
   cpiecexpos=currentpiece[1][2]
@@ -107,12 +111,10 @@ function draw_block_area()
       if(currentpiece[2][i][j]!=0) do
         txp=(cpiecexpos+j)*4
         typ=(cpieceypos+i)*4
-        rectfill(33+txp,16+typ ,37+txp-1,20+typ ,currentpiece[2][i][j])
+        rectfill(33+txp,15+typ ,36+txp,18+typ ,currentpiece[2][i][j])
       end
     end
   end
-
-  --reset colour
   color()
 end
 
@@ -136,7 +138,7 @@ end
 function draw_score_area()
 
   --next piece
-  rectfill(9,17 ,35,46 ,0)
+  rectfill(9,17 ,34,46 ,0)
   color()
   print("next", 16,15)
   line(11,17 ,9,17)
@@ -154,17 +156,27 @@ function draw_score_area()
   print(score, 65,4)
 
   --beat line
-  line(79,40,100,40,missedcolours[missednotes+1])
+  line(78,40,100,40,missedcolours[missednotes+1])
 
   --combo display
   --combo=100--testing
-  local avcol={}
+  --available colours for combo colour cycling
+  local avcol={} 
   if(combo>0)do
     for i=1,ceil(combo/20) do 
       if(i<=#combocolours) do avcol[i]=combocolours[i] end
     end
+    --combo text
     print("combo",81+rnd(combo/10),15+rnd(combo/10) ,rnd(avcol))
     print(combo, 100,30 ,rnd(avcol))  
+    --overlay over pieces
+    for i=37,76 do 
+      for j=19,118 do 
+        if(pget(i,j)!=0 and j%2==stat(26)%2)do
+          pset(i,j,rnd(avcol))
+        end
+      end
+    end 
   end
   color()
 end
@@ -268,6 +280,7 @@ function _draw()
     draw_note_area()
     draw_block_area()
     draw_score_area()
+    draw_current_piece()
     --run fx for line clears
     clearfx()
   end
@@ -408,7 +421,7 @@ end
 --lat for lateral detection, -1 left, 1 right
 function collisionator(lat)
 
-  if(lat==nil)do lat=0 end --yikes
+  if(lat==nil)do lat=0 end --yikes lua, wtf
 
   --default result
   res=0
@@ -419,7 +432,7 @@ function collisionator(lat)
   local yc=currentpiece[1][1]
   for i=1,#piece do
     for j=1,#piece[1] do 
-      if(piece[i][j]!=0 and yc+#piece<25 and xc>1 and xc<10)do 
+      if(piece[i][j]!=0 and yc+#piece<25)do 
         --check if it collides with background
         if (grid[yc+i][xc+j]!=0) then return -1 end 
         --check if there are things below
@@ -427,12 +440,16 @@ function collisionator(lat)
           res=1 
         end 
         --right 
-        if (grid[yc+i][xc+j+1]!=0 and lat==1) do
-          res=1 
+        if(xc+#piece[1]<10)do
+          if(grid[yc+i][xc+j+1]!=0 and lat==1) do
+            res=1 
+          end 
         end 
         --left
-        if (grid[yc+i][xc+j-1]!=0 and lat==-1) do
-          res=1 
+        if(xc>1)do
+          if(grid[yc+i][xc+j-1]!=0 and lat==-1) do
+            res=1 
+          end 
         end 
       end 
     end 
@@ -485,7 +502,7 @@ function fuse()
     if(flines>0)do
 
       --shake screen 
-      offset=3*flines
+      offset=2*flines
       --run clear fx
       clearing=5
       --play sound
@@ -501,7 +518,7 @@ function fuse()
       else
         mscore=mscore+500
       end
-      if(combomark==1) then mscore=mscore+mscore*flr(combo/10) end
+      if(combo>0) then mscore=mscore+mscore*ceil(combo/2) end
       score=score+mscore
       lines=lines+flines
     end
