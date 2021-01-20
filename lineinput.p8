@@ -4,14 +4,7 @@ __lua__
 -- Line!! input!!!
 -- second line
 
-function debug(text)
-  printh(text,"lineinput_debug")
-end
-
 function _init()
-
-  --Clear debug file
-  printh("init","lineinput_debug",true)
 
   --Game state.
   --0: Splash screen
@@ -594,7 +587,6 @@ function _update()
       sfx(55,-1,0,2)
     end
     if(btnp(1))do --right
-      debug("bla")
       bgm=((bgm+3)%3)+1
       sfx(55,-1,0,2)
     end
