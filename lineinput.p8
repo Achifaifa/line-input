@@ -34,10 +34,10 @@ function _init()
   pieces={}
   pieces[1]={{15,15},{15,15}} --square
   pieces[2]={{14},{14},{14},{14}} --line
-  --pieces[3]={{13,13,0},{0,13,13}} --z1
-  --pieces[4]={{0,12,12},{12,12,0}} --z2
-  --pieces[5]={{0,11},{0,11},{11,11}} --l1
-  --pieces[6]={{10,0},{10,0},{10,10}} --l2
+  pieces[3]={{13,13,0},{0,13,13}} --z1
+  pieces[4]={{0,12,12},{12,12,0}} --z2
+  pieces[5]={{0,11},{0,11},{11,11}} --l1
+  pieces[6]={{10,0},{10,0},{10,10}} --l2
 
   --colour palette for missed note indicator
   missedcolours={15,11,9,8,5}
@@ -134,10 +134,6 @@ function draw_note_area()
     end
   end
 
-  --remove notes over and under block area height
-  --rectfill(73,0,125,23,0)
-  --rectfill(73,116,125,128,0)
-
   --reset colour
   color()
 end
@@ -145,32 +141,34 @@ end
 function draw_score_area()
 
   --next piece
-  print("next", 0,20)
-  line(17,22 ,25,22)
-  line(25,50)
-  line(0,50)
-  line(0,26)
+  rectfill(9,17 ,35,46 ,0)
+  color()
+  print("next", 16,15)
+  line(11,17 ,9,17)
+  line(9,46)
+  line(30,46)
   for i=1,#nextpiece do 
     for j=1,#nextpiece[i] do
-      rectfill(1+(j*4),27+(i*4) ,5+(j*4),31+(i*4) ,nextpiece[i][j])
+      rectfill(15+(j*4),20+(i*4) ,19+(j*4),24+(i*4) ,nextpiece[i][j])
     end
   end
   color()
 
   --score
-  print(score, 2,53)
+  print("score", 37,4)
+  print(score, 65,4)
 
   --beat line
-  line(78,40,110,40,missedcolours[missednotes+1])
+  line(79,40,100,40,missedcolours[missednotes+1])
 
   --combo display
-  combo=100
+  --combo=100--testing
   local avcol={}
   if(combo>0)do
     for i=1,ceil(combo/20) do 
       if(i<=#combocolours) do avcol[i]=combocolours[i] end
     end
-    print("combo",79+rnd(combo/10),15+rnd(combo/10) ,rnd(avcol))
+    print("combo",81+rnd(combo/10),15+rnd(combo/10) ,rnd(avcol))
     print(combo, 100,30 ,rnd(avcol))  
   end
   color()
@@ -226,6 +224,14 @@ function sake()
   end
 end
 
+function background()
+  for i=0,16 do 
+    for j=0,16 do 
+      spr(6,i*8,j*8)
+    end 
+  end 
+end
+
 function clearfx()
 
   if(clearing>0)do
@@ -261,11 +267,8 @@ function _draw()
   --game loop
   if (state==2) then
     --background
-    for i=0,16 do 
-      for j=0,16 do 
-        spr(6,i*8,j*8)
-      end 
-    end 
+    --background()
+    rectfill(79,18, 100,121, 0)
     --content
     draw_note_area()
     draw_block_area()
